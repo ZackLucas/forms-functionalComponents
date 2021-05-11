@@ -4,18 +4,12 @@ import { Container, Typography } from '@material-ui/core';
 import 'fontsource-nunito';
 
 import RegisterForms from './components/registerForms';
+import Validations from './contexts/validations';
+import { cpfValidate, passwordValidate } from './models/register';
 
 function App() {
   const onSubmit = (data) => {
     console.log(data);
-  };
-
-  const cpfValidate = (cpf) => {
-    if (cpf.length !== 11) {
-      return { hasError: true, text: 'CPF deve possuir 11 digitos.' };
-    }
-
-    return { hasError: false, text: '' };
   };
 
   return (
@@ -23,7 +17,11 @@ function App() {
       <Typography variant="h3" component="h1" align="center">
         Formulario de cadastro
       </Typography>
-      <RegisterForms onSubmit={onSubmit} cpfValidate={cpfValidate} />
+      <Validations.Provider
+        value={{ cpf: cpfValidate, password: passwordValidate }}
+      >
+        <RegisterForms onSubmit={onSubmit} />
+      </Validations.Provider>
     </Container>
   );
 }

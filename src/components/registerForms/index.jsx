@@ -1,109 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  Button, TextField, Switch, FormControlLabel,
+  Step, StepLabel, Stepper, Typography,
 } from '@material-ui/core';
+import PersonalData from './PersonalData';
+import UserData from './UserData';
+import DeliveryData from './DeliveryData';
 
-function RegisterForms({ onSubmit, cpfValidate }) {
-  const [name, setName] = useState('');
-  const [surname, setSurname] = useState('');
-  const [CPF, setCPF] = useState('');
-  const [promotions, setPromotions] = useState(true);
-  const [news, setNews] = useState(false);
-  const [errors, setErrors] = useState({
-    cpf: {
-      hasError: false,
-      text: '',
-    },
+function RegisterForms({ onSubmit }) {
+  const [currentStep, setCurrentStep] = useState(0);
+  const [collectedData, setData] = useState({});
+
+  function nextStep() {
+    setCurrentStep(currentStep + 1);
+  }
+
+  function collectData(data) {
+    setData({ ...collectedData, ...data });
+    nextStep();
+  }
+
+  const forms = [
+    <UserData onSubmit={collectData} />,
+    <PersonalData onSubmit={collectData} />,
+    <DeliveryData onSubmit={collectData} />,
+    <Typography variant="h5" align="center">Obrigado pelo Cadastro</Typography>,
+  ];
+
+  useEffect(() => {
+    if (currentStep === forms.length - 1) {
+      onSubmit(collectedData);
+    }
   });
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        onSubmit({
-          name, surname, CPF, promotions, news,
-        });
-      }}
-    >
-      <TextField
-        id="name"
-        label="Nome"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        value={name}
-        onChange={(e) => {
-          setName(e.target.value);
-        }}
-      />
-      <TextField
-        id="surname"
-        label="Sobrenome"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        value={surname}
-        onChange={(e) => {
-          setSurname(e.target.value);
-        }}
-      />
-      <TextField
-        id="cpf"
-        label="CPF"
-        variant="outlined"
-        fullWidth
-        margin="normal"
-        error={errors.cpf.hasError}
-        helperText={errors.cpf.text}
-        value={CPF}
-        onChange={(e) => {
-          setCPF(e.target.value);
-        }}
-        onBlur={(e) => {
-          const errorObj = cpfValidate(e.target.value);
-          setErrors({ cpf: errorObj });
-        }}
-      />
-
-      <FormControlLabel
-        label="Promoções"
-        control={(
-          <Switch
-            name="promotions"
-            checked={promotions}
-            onChange={(e) => {
-              setPromotions(e.target.checked);
-            }}
-            color="primary"
-          />
-        )}
-      />
-      <FormControlLabel
-        label="Novidades"
-        control={(
-          <Switch
-            name="news"
-            checked={news}
-            onChange={(e) => {
-              setNews(e.target.checked);
-            }}
-            color="primary"
-          />
-        )}
-      />
-
-      <Button variant="contained" color="primary" type="submit">
-        Cadastrar
-      </Button>
-    </form>
+    <>
+      <Stepper activeStep={currentStep}>
+        <Step>
+          <StepLabel>Login</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>Pessoal</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>Entrega</StepLabel>
+        </Step>
+        <Step>
+          <StepLabel>Finalização</StepLabel>
+        </Step>
+      </Stepper>
+      {forms[currentStep]}
+    </>
   );
 }
 
 RegisterForms.propTypes = {
   onSubmit: PropTypes.func.isRequired,
-  cpfValidate: PropTypes.func.isRequired,
 };
 
 export default RegisterForms;
